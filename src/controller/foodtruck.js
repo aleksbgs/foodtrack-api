@@ -2,13 +2,15 @@ import mongoose from 'mongoose';
 import {Router} from 'express';
 import FoodTruck from '../model/foodtruck';
 import Review from '../model/review'
+import {authenticate} from '../middleware/authMiddleware';
+
 
 export default ({config, db}) => {
     let api = Router();
 
     //CRUD read,update,delete
     // Create
-    api.post('/add', (req, res) => {
+    api.post('/add',authenticate, (req, res) => {
         let newFoodTruck = new FoodTruck();
         newFoodTruck.name = req.body.name;
         newFoodTruck.foodtype = req.body.foodtype;
@@ -27,7 +29,7 @@ export default ({config, db}) => {
     });
 
     // read all reastaurants
-    api.get('/', (req, res) => {
+    api.get('/', authenticate,(req, res) => {
         FoodTruck.find({}, (err, foodtruck) => {
             if (err) {
                 res.send(err);
@@ -39,7 +41,7 @@ export default ({config, db}) => {
 
     // /v1/foodtruck/:id Read one foodtruck
 
-    api.get('/:id', (req, res) => {
+    api.get('/:id', authenticate,(req, res) => {
         FoodTruck.findById(req.params.id, (err, foodtruck) => {
             if (err) {
                 res.send(err);
@@ -50,7 +52,7 @@ export default ({config, db}) => {
     });
 
     //update /v1/foodtruck/:id -Update
-    api.put('/:id', (req, res) => {
+    api.put('/:id', authenticate,(req, res) => {
 
         FoodTruck.findById(req.params.id, (err, foodtruck) => {
             if (err) {
@@ -71,7 +73,7 @@ export default ({config, db}) => {
 
     });
 
-    api.delete('/:id', (req, res) => {
+    api.delete('/:id',authenticate, (req, res) => {
         FoodTruck.remove({
             _id: req.params.id
 
@@ -84,7 +86,7 @@ export default ({config, db}) => {
         });
     });
     //add rev for specific foodtruck id
-    api.post('/reviews/add/:id',(req,res)=>{
+    api.post('/reviews/add/:id',authenticate,(req,res)=>{
         FoodTruck.findById(req.params.id,(err, foodtruck)=>{
             if(err){
                 res.send(err);
@@ -111,7 +113,7 @@ export default ({config, db}) => {
 
     //get reviews for specific food truck
 
-    api.get('/reviews/:id',(req,res)=>{
+    api.get('/reviews/:id',authenticate,(req,res)=>{
         Review.find({foodtruck:req.params.id},(err,reviews)=>{
             if(err){
                 res.send(err);
